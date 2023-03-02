@@ -1,10 +1,10 @@
 const router = require('express').Router();
-const { User } = require('../models');
+const { User } = require('../../models');
 
 // GET all users
 router.get('/', async (req, res) => {
   try {
-    const users = await User.find();
+    const users = await User.find().populate("thoughts");
     res.json(users);
   } catch (err) {
     console.error(err);
@@ -42,7 +42,9 @@ router.post('/', async (req, res) => {
 // PUT to update a user by its _id
 router.put('/:id', async (req, res) => {
   try {
-    const user = await User.findByIdAndUpdate(req.params.id, req.body, {
+    const user = await User.findOneAndUpdate({
+      _id:req.params.id
+    }, req.body, {
       new: true,
       runValidators: true
     });
