@@ -49,7 +49,6 @@ router.post('/', async (req, res) => {
   }
 });
 
-// PUT to update a thought by its _id
 router.put('/:id', async (req, res) => {
   try {
     const thought = await Thought.findByIdAndUpdate(req.params.id, req.body, {
@@ -77,6 +76,48 @@ router.delete('/:id', async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to delete thought' });
+  }
+});
+
+router.post('/:thoughtId/reactions', async (req, res) => {
+  try {
+    const thought = await Thought.findByIdAndUpdate(req.params.thoughtId, {
+      $addToSet:{
+        reactions:req.body
+      }
+    }, {
+      new: true,
+      runValidators: true
+    });
+    if (!thought) {
+      return res.status(404).json({ error: 'Thought not found' });
+    }
+    res.json(thought);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to update thought' });
+  }
+});
+
+router.delete('/:thoughtId/reactions/:reactionId', async (req, res) => {
+  try {
+    const thought = await Thought.findByIdAndUpdate(req.params.thoughtId, {
+      $pull:{
+        reactions: {
+          reactionId: req.params.reactionId
+        }
+      }
+    }, {
+      new: true,
+      runValidators: true
+    });
+    if (!thought) {
+      return res.status(404).json({ error: 'Thought not found' });
+    }
+    res.json(thought);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to update thought' });
   }
 });
 

@@ -4,7 +4,7 @@ const { User } = require('../../models');
 // GET all users
 router.get('/', async (req, res) => {
   try {
-    const users = await User.find().populate("thoughts");
+    const users = await User.find().populate("thoughts").populate("friends");
     res.json(users);
   } catch (err) {
     console.error(err);
@@ -69,6 +69,46 @@ router.delete('/:id', async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to delete user' });
+  }
+});
+
+router.post('/:userId/friends/:friendId', async (req, res) => {
+  try {
+    const user = await User.findByIdAndUpdate(req.params.userId, {
+      $addToSet:{
+        friends:req.params.friendId
+      }
+    }, {
+      new: true,
+      runValidators: true
+    });
+    if (!user) {
+      return res.status(404).json({ error: 'user not found' });
+    }
+    res.json(user);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to update user' });
+  }
+});
+
+router.delete('/:userId/friends/:friendId', async (req, res) => {
+  try {
+    const user = await User.findByIdAndUpdate(req.params.userId, {
+      $pull:{
+        friends:req.params.friendId
+      }
+    }, {
+      new: true,
+      runValidators: true
+    });
+    if (!user) {
+      return res.status(404).json({ error: 'user not found' });
+    }
+    res.json(user);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to update user' });
   }
 });
 
